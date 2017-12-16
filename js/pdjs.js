@@ -135,7 +135,7 @@
       return this.api(params);
     };
 
-    PDJSobj.prototype.event = function(params) {
+    PDJSobj.prototype.eventV1 = function(params) {
       if (params == null) {
         params = {};
       }
@@ -170,12 +170,69 @@
       return $.ajax(params);
     };
 
+    // TODO: handle informative erring out if required arguments are empty
+    PDJSobj.prototype.eventV2 = function(params) {
+      if (params == null) {
+        params = {};
+      }
+      this.logg("Create an event");
+      params.type = "POST";
+      params.url = params.url || this.protocol + "://events." + this.server + "/v2/enqueue";
+      params.data = params.data || {};
+
+      /*
+        Required params
+      */
+      params.data.routing_key = params.data.routing_key || params.routing_key || this.logg("No routing key");
+      params.data.event_action = params.data.event_action || params.event_action || "trigger";
+
+      /*
+        Optional params
+      */
+      params.data.dedup_key = params.data.dedup_key || params.dedup_key;
+      params.data.images = params.data.images || params.images;
+      params.data.links = params.data.links || params.links;
+      
+      
+      params.data.payload = params.data.payload ? params.data.payload : {};
+      /*
+        Required payload params
+      */
+      params.data.payload.summary = params.data.summary || params.summary;
+      params.data.payload.source = params.data.source || params.source;
+      params.data.payload.severity = params.data.severity || params.severity;
+
+      /*
+        Optional params
+      */
+      params.data.payload.timestamp = params.data.timestamp || params.timestamp;
+      params.data.payload.component = params.data.component || params.component;
+      params.data.payload.group = params.data.group || params.group;
+      params.data.payload.class = params.data.class || params.class;
+      params.data.payload.custom_details = params.data.custom_details || params.custom_details;
+      
+      params.data = JSON.stringify(params.data);
+      params.contentType = "application/json; charset=utf-8";
+      params.dataType = "json";
+      params.error = params.error || (function(_this) {
+        return function(err) {
+          return _this.error_function(err, params);
+        };
+      })(this);
+      params.success = params.success || (function(_this) {
+        return function(data) {
+          return _this.no_success_function(data, params);
+        };
+      })(this);
+      return $.ajax(params);
+    };
+
     PDJSobj.prototype.trigger = function(params) {
       if (params == null) {
         params = {};
       }
       params.event_type = "trigger";
-      return this.event(params);
+      return this.eventV2(params);
     };
 
     PDJSobj.prototype.acknowledge = function(params) {
@@ -183,7 +240,7 @@
         params = {};
       }
       params.event_type = "acknowledge";
-      return this.event(params);
+      return this.eventV1(params);
     };
 
     PDJSobj.prototype.resolve = function(params) {
@@ -191,7 +248,7 @@
         params = {};
       }
       params.event_type = "resolve";
-      return this.event(params);
+      return this.eventV1(params);
     };
 
     return PDJSobj;
