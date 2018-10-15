@@ -1,8 +1,7 @@
 var pdjs_settings = {
-  subdomain: "pdt-circular",
-  token: "AbXSzhc8PzcJfujrzxMF", 
+  token: "AbXSzhc8PzcJfujrzxMF", // Not a valid token; replace this with your API key
   refresh: 60,
-  server: 'pagerduty.com',
-  protocol: 'https',  
+  server: 'api.pagerduty.com',
+  protocol: 'https',
   logging: true,
 }
